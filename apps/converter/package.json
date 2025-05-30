@@ -1,0 +1,66 @@
+{
+  "name": "@coc/converter",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "apps/converter/dist",
+          "format": [
+            "cjs"
+          ],
+          "bundle": false,
+          "main": "apps/converter/src/main.ts",
+          "tsConfig": "apps/converter/tsconfig.app.json",
+          "assets": [
+            "apps/converter/src/assets"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        },
+        "configurations": {
+          "development": {},
+          "production": {
+            "esbuildOptions": {
+              "sourcemap": false,
+              "outExtension": {
+                ".js": ".js"
+              }
+            }
+          }
+        }
+      },
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@coc/converter:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@coc/converter:build:development"
+          },
+          "production": {
+            "buildTarget": "@coc/converter:build:production"
+          }
+        }
+      }
+    }
+  }
+}

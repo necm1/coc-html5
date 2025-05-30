@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noImplicitAny": true,
+    "lib": ["ES7"],
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "declaration": false
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "exclude": [
+    "dist",
+    "dist/*",
+    "**/dist",
+    "**/dist/*",
+    "node_modules",
+    "node_modules/*",
+    "**/node_modules",
+    "**/node_modules/*",
+    "tmp",
+    "tmp/*",
+    "**/tmp",
+    "**/tmp/*"
+  ],
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/converter"
+    }
+  ]
+}
