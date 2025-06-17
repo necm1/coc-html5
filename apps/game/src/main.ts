@@ -1,1 +1,3 @@
-import './app/app.element';
+(async () => {
+  console.log('Game is starting...');
+})();

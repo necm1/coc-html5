@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "converter:dev": "nx run @coc/converter:serve",
-    "converter:assets": "nx run @coc/converter:assets"
+    "converter:assets": "nx run @coc/converter:assets",
+    "game:dev": "nx run @coc/game:serve",
+    "game:build": "nx run @coc/game:build"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
