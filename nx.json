@@ -40,7 +40,11 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/bobba-e2e/**/*", "apps/bobba-e2e/**/*"]
+      "exclude": [
+        "apps/bobba-e2e/**/*",
+        "apps/bobba-e2e/**/*",
+        "apps/game-e2e/**/*"
+      ]
     },
     {
       "plugin": "@nx/vite/plugin",

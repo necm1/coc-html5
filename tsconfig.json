@@ -32,6 +32,12 @@
   "references": [
     {
       "path": "./apps/converter"
+    },
+    {
+      "path": "./apps/game-e2e"
+    },
+    {
+      "path": "./apps/game"
     }
   ]
 }
