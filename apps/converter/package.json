@@ -20,12 +20,20 @@
           "main": "apps/converter/src/main.ts",
           "tsConfig": "apps/converter/tsconfig.app.json",
           "assets": [
-            "apps/converter/src/assets"
+            "apps/converter/src/assets",
+            {
+              "input": "apps/converter/src/lzham",
+              "glob": "**/*",
+              "output": "apps/converter/src/lzham"
+            }
           ],
           "esbuildOptions": {
             "sourcemap": true,
             "outExtension": {
               ".js": ".js"
+            },
+            "loader": {
+              ".wasm": "file"
             }
           }
         },
@@ -36,6 +44,9 @@
               "sourcemap": false,
               "outExtension": {
                 ".js": ".js"
+              },
+              "loader": {
+                ".wasm": "file"
               }
             }
           }
@@ -62,5 +73,13 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "@mongodb-js/zstd": "^2.0.1",
+    "canvas": "^3.1.0",
+    "fzstd": "^0.1.1",
+    "ktx-parse": "^1.0.0",
+    "lzma-native": "^8.0.6",
+    "sharp": "^0.34.2"
   }
 }

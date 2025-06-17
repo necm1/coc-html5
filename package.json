@@ -4,7 +4,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "converter:dev": "nx run @coc/converter:serve"
+    "converter:dev": "nx run @coc/converter:serve",
+    "converter:assets": "nx run @coc/converter:assets"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
