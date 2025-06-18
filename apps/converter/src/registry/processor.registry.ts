@@ -24,9 +24,6 @@ export class ProcessorRegistry extends Registry<Processor> {
       );
     }
 
-    console.log(
-      `Processor "${processor.constructor.name}" registered successfully.`
-    );
     this.items.push(processor);
   }
 
