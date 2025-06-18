@@ -75,6 +75,20 @@ export class BufferReader {
     return value;
   }
 
+  public readInt32BE(offset = this._offset): number {
+    this.validateLength(4);
+
+    const value = this._buffer.readInt32BE(offset);
+
+    if (offset === this._offset) {
+      this._offset += 4;
+    } else {
+      this._offset = offset + 4;
+    }
+
+    return value;
+  }
+
   public readInt16LE(offset = this._offset): number {
     this.validateLength(2);
 

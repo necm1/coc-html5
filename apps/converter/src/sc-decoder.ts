@@ -12,14 +12,43 @@ import { ShapeRenderer } from './renderer/shape.renderer';
 import { Matrix2x3 } from './entity/matrix2x3.entity';
 import { writeFile } from 'fs/promises';
 import sharp from 'sharp';
+import { ScProcessor } from './processor/sc.processor';
+import { SigProcessor } from './processor/sig.processor';
+import { ZstdProcessor } from './processor/zstd.processor';
+import { SclzProcessor } from './processor/sclz.processor';
+import { LzmaProcessor } from './processor/lzma.processor';
+import { LzhamProcessor } from './processor/lzham.processor';
+import { ShapeHandler } from './handler/shape.handler';
+import { TextureHandler } from './handler/texture.handler';
+import { NoTextureHandler } from './handler/no-texture.handler';
+import { MovieClipsHandler } from './handler/movie-clips.handler';
+import { MatrixHandler } from './handler/matrix.handler';
+import { ResetMatrixHandler } from './handler/reset-matrix.handler';
+import { UncommonTextureHandler } from './handler/uncommon-texture.handler';
 
 export class ScDecoder {
   private _scFile: ScFile;
+  private processorRegistry: ProcessorRegistry;
+  private handlerRegistry: HandlerRegistry;
 
-  constructor(
-    private readonly processorRegistry: ProcessorRegistry,
-    private readonly handlerRegistry: HandlerRegistry
-  ) {}
+  constructor() {
+    this.processorRegistry = new ProcessorRegistry();
+    this.processorRegistry.register(new ScProcessor());
+    this.processorRegistry.register(new SigProcessor());
+    this.processorRegistry.register(new ZstdProcessor());
+    this.processorRegistry.register(new SclzProcessor());
+    this.processorRegistry.register(new LzmaProcessor());
+    this.processorRegistry.register(new LzhamProcessor());
+
+    this.handlerRegistry = new HandlerRegistry();
+    this.handlerRegistry.register(new ShapeHandler());
+    this.handlerRegistry.register(new TextureHandler());
+    this.handlerRegistry.register(new NoTextureHandler());
+    this.handlerRegistry.register(new MovieClipsHandler());
+    this.handlerRegistry.register(new MatrixHandler());
+    this.handlerRegistry.register(new ResetMatrixHandler());
+    this.handlerRegistry.register(new UncommonTextureHandler());
+  }
 
   public async decode(scFile: ScFile, isTexture = false): Promise<void> {
     this._scFile = scFile;
@@ -60,8 +89,10 @@ export class ScDecoder {
     if (!this._scFile.textureLoaded) {
       const texPath = this._scFile.filePath.replace(/\.sc$/, '_tex.sc');
       await this._scFile.load(texPath);
+
       this._scFile.textureLoaded = true;
       this._scFile.hasTexture = true;
+
       await this.decode(this._scFile, true);
     }
 
@@ -72,45 +103,45 @@ export class ScDecoder {
     console.log('SC file decoding completed.');
   }
 
-  public async decodeMetadata(scFile = this._scFile): Promise<void> {
+  public async decodeMetadata(
+    scFile = this._scFile,
+    loadMetaTags = false
+  ): Promise<void> {
     console.log('Decoding metadata...');
 
-    while (true) {
-      try {
-        const processor = await this.processorRegistry.getItem(
-          scFile.bufferReader
-        );
+    try {
+      const processor = await this.processorRegistry.getItem(
+        scFile.bufferReader
+      );
 
-        if (!processor) {
-          break;
-        }
-
-        // console.log(`Processor detected: ${processor.constructor.name}`);
-        await processor.process(scFile);
-
-        // console.log(`Decompressed length: ${scFile.bufferReader.length}`);
-        // console.log(
-        //   `Decompressed head: ${scFile.bufferReader.buffer
-        //     .subarray(0, 32)
-        //     .toString('hex')}`
-        // );
-        // console.log(`BufferReader offset: ${scFile.bufferReader.offset}`);
-      } catch (error) {
-        if (error instanceof NoProcessorException) {
-          break;
-        } else {
-          console.error('Error during processing:', error);
-          throw error;
-        }
+      if (!processor) {
+        return;
       }
+
+      await processor.process(scFile);
+
+      if (
+        [ScProcessor.name, SigProcessor.name].includes(
+          processor.constructor.name
+        )
+      ) {
+        await this.decodeMetadata(scFile, true);
+      }
+    } catch (error) {
+      if (error instanceof NoProcessorException) {
+        return;
+      }
+
+      throw error;
     }
 
-    if (!scFile.isTextureFile) {
-      console.log('here decoding normal sc file');
-      await this.decodeFileMetadata(scFile.bufferReader, scFile);
-    }
+    if (loadMetaTags) {
+      if (!scFile.isTextureFile) {
+        await this.decodeFileMetadata(scFile.bufferReader, scFile);
+      }
 
-    await this.loadTags(scFile);
+      await this.loadTags(scFile);
+    }
   }
 
   private async decodeFileMetadata(
@@ -125,10 +156,6 @@ export class ScDecoder {
     metadata.TEXT_FIELDS = reader.readUInt16LE();
     metadata.TRANSFORM_MATRICES = reader.readUInt16LE();
     metadata.COLOR_TRANSFORMS = reader.readUInt16LE();
-
-    // scFile.shapes.concat(
-    //   Array.from({ length: metadata.SHAPES }, () => new Shape())
-    // );
 
     scFile.matrix.load(metadata.TRANSFORM_MATRICES, metadata.COLOR_TRANSFORMS);
     scFile.matrices.push(scFile.matrix);
@@ -243,7 +270,6 @@ export class ScDecoder {
       });
     }
 
-    // Schreibe die Zusammenfassung als JSON-Datei
     const summaryPath = join(outputPath, 'shapes', 'shapes_regions.json');
     await writeFile(summaryPath, JSON.stringify(shapesRegionsSummary, null, 2));
   }

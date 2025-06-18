@@ -5,22 +5,11 @@ import { ScFile } from '../sc-file';
 
 export class ZstdProcessor extends Processor {
   public canProcess(data: BufferReader): boolean {
-    const bytes = data.buffer.subarray(0, 4);
-
-    if (
-      bytes[0] !== 0x28 &&
-      bytes[1] !== 0xb5 &&
-      bytes[2] !== 0x2f &&
-      bytes[3] !== 0xfd
-    ) {
-      return false;
-    }
-
-    return true;
+    const buffer = data.buffer;
+    return buffer.subarray(0, 4).equals(Buffer.from([0x28, 0xb5, 0x2f, 0xfd]));
   }
 
   public async process(scFile: ScFile): Promise<void> {
-    console.log('ZSTD detected');
     if (!scFile.bufferReader?.buffer) {
       throw new Error(
         'BufferReader buffer is empty. Please ensure the file is loaded correctly.'

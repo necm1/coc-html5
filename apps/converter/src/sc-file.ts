@@ -53,13 +53,18 @@ export class ScFile {
   constructor(public readonly filePath: string) {}
 
   public async load(file = this.filePath): Promise<void> {
-    // const file = this.filePath;
     this.isTextureFile = basename(file, '.sc').endsWith('_tex');
 
     try {
       const readStream: () => Promise<void> = async () => {
         const buffer = await readFile(file);
-        this.bufferReader = new BufferReader(Buffer.from(buffer));
+        const startIndex = buffer.indexOf(Buffer.from('START'));
+
+        this.bufferReader = new BufferReader(
+          Buffer.from(
+            startIndex !== -1 ? buffer.subarray(0, startIndex) : buffer
+          )
+        );
       };
 
       await Promise.all([fs.access(file), readStream()]);

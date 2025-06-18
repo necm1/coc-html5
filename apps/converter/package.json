@@ -79,7 +79,12 @@
     "canvas": "^3.1.0",
     "fzstd": "^0.1.1",
     "ktx-parse": "^1.0.0",
+    "lzma": "^2.3.2",
     "lzma-native": "^8.0.6",
+    "lzma-purejs": "^0.9.3",
     "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "@types/lzma-native": "^4.0.4"
   }
 }
