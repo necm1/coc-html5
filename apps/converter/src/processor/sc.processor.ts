@@ -10,39 +10,24 @@ export class ScProcessor extends Processor {
   public async process(scFile: ScFile): Promise<void> {
     const bufferReader = scFile.bufferReader;
 
-    // Skip the first 2 bytes ('SC')
     bufferReader.readBytes(2).toString('utf-8');
 
-    const fileVersion = bufferReader.readUInt32BE();
+    scFile.version = bufferReader.readInt32BE();
 
-    if (fileVersion !== 4) {
-      scFile.version = fileVersion;
-
-      const hashLength = bufferReader.readUInt32BE();
-      bufferReader.buffer = bufferReader.buffer.subarray(10 + hashLength);
-      // bufferReader.readBytes(hashLength);
-      console.log(
-        `SC file version: ${scFile.version}, hash length: ${hashLength}`
-      );
-      return;
+    if (scFile.version === 4) {
+      scFile.version = bufferReader.readInt32BE();
     }
 
-    scFile.version = bufferReader.readUInt32BE();
-    // scFile.version = bufferReader.readUInt32BE();
+    if (scFile.version === 0x05) {
+      const metadataTableOffset = bufferReader.readInt32LE();
+      bufferReader.readBytes(metadataTableOffset);
+    } else {
+      const hashLength = bufferReader.readInt32BE();
+      scFile.fileHash = bufferReader.readBytes(hashLength).toString('hex');
+    }
 
-    const hashLength = bufferReader.readUInt32BE();
-
-    const endBlockSize = bufferReader.buffer.readUInt32BE(
-      bufferReader.length - 4
-    );
-
-    console.log(
-      `SC file version: ${scFile.version}, hash length: ${hashLength}, end offset: ${endBlockSize}`
-    );
-
-    bufferReader.buffer = bufferReader.buffer.subarray(
-      14 + hashLength,
-      bufferReader.length - endBlockSize - 9
+    scFile.bufferReader = new BufferReader(
+      bufferReader.buffer.subarray(bufferReader.offset)
     );
   }
 }
