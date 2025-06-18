@@ -13,8 +13,13 @@ export class MatrixHandler extends Handler {
     file,
     tag,
     length,
+    matricesLoaded,
   }: HandlerProps): Promise<void> {
-    await file.matrix.load(tag, length);
+    if (typeof matricesLoaded !== 'number') {
+      throw new Error('Matrices loaded index is not defined');
+    }
+
+    await file.matrix.getMatrix(matricesLoaded).load(file, tag);
 
     HandlerEventEmitter.getInstance().emit('afterHandle', {
       type: HandlerEventType.MATRIX_LOADED,

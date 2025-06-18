@@ -103,10 +103,12 @@ export class BufferReader {
     return value;
   }
 
-  public readByte(offset = this._offset): number {
+  public readByte(offset = this._offset, unsigned = true): number {
     this.validateLength(1);
 
-    const value = this._buffer.readUInt8(offset);
+    const value = unsigned
+      ? this._buffer.readUInt8(offset)
+      : this._buffer.readInt8(offset);
 
     if (offset === this._offset) {
       this._offset += 1;
@@ -139,8 +141,11 @@ export class BufferReader {
       length = this.readByte();
     }
 
-    const buf = this.readBytes(length);
-    return buf.toString(encoding);
+    if (length !== 0xff) {
+      return this.readBytes(length).toString(encoding);
+    } else {
+      return '';
+    }
   }
 
   private validateLength(length: number): void {

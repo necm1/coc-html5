@@ -17,11 +17,11 @@ export class Shape extends Entity {
     }
 
     while (true) {
-      const regionTag = reader.readByte();
+      const regionTag = reader.readByte(reader.offset, false);
       const regionLength = reader.readUInt32LE();
 
       if (regionTag == 0) {
-        break;
+        return;
       }
 
       if ([4, 17, 22].includes(regionTag)) {

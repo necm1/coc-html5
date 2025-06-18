@@ -41,11 +41,11 @@ export class ScDecoder {
     this.processorRegistry.register(new LzhamProcessor());
 
     this.handlerRegistry = new HandlerRegistry();
-    this.handlerRegistry.register(new ShapeHandler());
     this.handlerRegistry.register(new TextureHandler());
-    this.handlerRegistry.register(new NoTextureHandler());
+    this.handlerRegistry.register(new ShapeHandler());
     this.handlerRegistry.register(new MovieClipsHandler());
     this.handlerRegistry.register(new MatrixHandler());
+    this.handlerRegistry.register(new NoTextureHandler());
     this.handlerRegistry.register(new ResetMatrixHandler());
     this.handlerRegistry.register(new UncommonTextureHandler());
   }
@@ -66,25 +66,8 @@ export class ScDecoder {
       throw new BufferEmptyException();
     }
 
-    console.log('Decoding SC file...');
+    console.log('> Decoding SC file...');
     await this.decodeMetadata(scFile);
-
-    // if (!this._scFile.textureLoaded) {
-    //   // this._texScFile = new ScFile(
-    //   //   this._scFile.filePath.replace(/_tex\.sc$/, '.sc')
-    //   // );
-    //   // await this._texScFile.load();
-    //   await this._scFile.load(
-    //     this._scFile.filePath.replace(/_tex\.sc$/, '.sc')
-    //   );
-    //   this._scFile.textureLoaded = true;
-    //   this._scFile.hasTexture = true;
-    //   console.log('set file textureLoaded to true');
-
-    //   await this.decode(this._scFile, true);
-    // }
-
-    // console.log(this._scFile.textures);
 
     if (!this._scFile.textureLoaded) {
       const texPath = this._scFile.filePath.replace(/\.sc$/, '_tex.sc');
@@ -100,15 +83,13 @@ export class ScDecoder {
       await this.saveShapes();
     }
 
-    console.log('SC file decoding completed.');
+    console.log('> SC file decoding completed.');
   }
 
   public async decodeMetadata(
     scFile = this._scFile,
     loadMetaTags = false
   ): Promise<void> {
-    console.log('Decoding metadata...');
-
     try {
       const processor = await this.processorRegistry.getItem(
         scFile.bufferReader
@@ -118,6 +99,7 @@ export class ScDecoder {
         return;
       }
 
+      console.log(`> Found processor: ${processor.constructor.name}`);
       await processor.process(scFile);
 
       if (
@@ -136,6 +118,7 @@ export class ScDecoder {
     }
 
     if (loadMetaTags) {
+      console.log('> Decoding metadata and tags...');
       if (!scFile.isTextureFile) {
         await this.decodeFileMetadata(scFile.bufferReader, scFile);
       }
@@ -166,7 +149,7 @@ export class ScDecoder {
     metadata.EXPORTS = reader.readUInt16LE();
 
     console.log(
-      `Shapes: ${metadata.SHAPES}, Movie Clips: ${metadata.MOVIE_CLIPS}, Textures: ${metadata.TEXTURES}, Text Fields: ${metadata.TEXT_FIELDS}, Transform Matrices: ${metadata.TRANSFORM_MATRICES}, Color Transforms: ${metadata.COLOR_TRANSFORMS}, Exports: ${metadata.EXPORTS}`
+      `> Shapes: ${metadata.SHAPES}, Movie Clips: ${metadata.MOVIE_CLIPS}, Textures: ${metadata.TEXTURES}, Text Fields: ${metadata.TEXT_FIELDS}, Transform Matrices: ${metadata.TRANSFORM_MATRICES}, Color Transforms: ${metadata.COLOR_TRANSFORMS}, Exports: ${metadata.EXPORTS}`
     );
 
     const assets: { id: number; name?: string }[] = [];
@@ -277,11 +260,10 @@ export class ScDecoder {
   private async loadTags(scFile = this._scFile): Promise<boolean> {
     const reader = scFile.bufferReader;
 
-    // let hasTexture = scFile.isTextureFile ? true : true;
     let textureId = 0;
-    let movieClipsLoaded = 0;
     let shapesLoaded = 0;
     let matricesLoaded = 0;
+    let movieClipsLoaded = 0;
 
     const afterHandleEvent = HandlerEventEmitter.getInstance().on(
       'afterHandle',
@@ -304,7 +286,6 @@ export class ScDecoder {
 
         if (type === HandlerEventType.NO_TEXTURE && !scFile.isTextureFile) {
           scFile.hasTexture = false;
-          // hasTexture = false;
         }
 
         if (type === HandlerEventType.MATRIX_LOADED) {
@@ -317,14 +298,18 @@ export class ScDecoder {
       const tag = reader.readByte();
       const length = reader.readUInt32LE();
 
-      if (!tag) {
-        console.log(JSON.stringify(scFile.movieClips));
+      if (tag === 0) {
         return scFile.isTextureFile;
       }
+
+      // console.log(
+      //   `> Processing tag: ${tag}, length: ${length}, offset: ${reader.offset}`
+      // );
 
       const handler = await this.handlerRegistry.getItem(tag);
 
       if (!handler) {
+        // console.warn(`No handler found for tag: ${tag}, skipping ${length}`);
         reader.readBytes(length);
       }
 
@@ -333,7 +318,10 @@ export class ScDecoder {
         tag,
         hasTexture: scFile.hasTexture,
         textureId,
+        shapesLoaded,
+        matricesLoaded,
         length,
+        movieClipsLoaded,
       });
     }
   }

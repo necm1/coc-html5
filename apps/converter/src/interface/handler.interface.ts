@@ -6,7 +6,10 @@ export type HandlerProps = {
   tag: number;
   hasTexture?: boolean;
   textureId?: number;
+  shapesLoaded?: number;
   length: number;
+  matricesLoaded?: number;
+  movieClipsLoaded?: number;
 };
 
 export abstract class Handler {

@@ -1,9 +1,10 @@
 import { Entity } from '../interface/entity.interface';
+import { ColorTransform } from './color-transform.entity';
 import { Matrix2x3 } from './matrix2x3.entity';
 
 export class Matrix extends Entity {
   public readonly matrices: Matrix2x3[] = [];
-  public readonly colorTransformations: any[] = [];
+  public readonly colorTransformations: ColorTransform[] = [];
 
   public override async load(
     matrixCount: number,
@@ -14,7 +15,7 @@ export class Matrix extends Entity {
     }
 
     for (let i = 0; i < colorTransformationCount; i++) {
-      this.colorTransformations.push({});
+      this.colorTransformations.push(new ColorTransform());
     }
   }
 
@@ -26,7 +27,7 @@ export class Matrix extends Entity {
     return this.matrices[index];
   }
 
-  public getColorTransformation(index: number): any {
+  public getColorTransformation(index: number): ColorTransform {
     if (index < 0 || index >= this.colorTransformations.length) {
       throw new Error(`Color transformation index out of bounds: ${index}`);
     }

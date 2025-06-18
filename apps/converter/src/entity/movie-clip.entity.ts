@@ -17,15 +17,16 @@ export class MovieClip extends Entity {
 
   public override async load(reader: BufferReader, tag: number): Promise<void> {
     this.id = reader.readUInt16LE();
-    this.fps = reader.readByte();
+    this.fps = reader.readByte(reader.offset, false);
     this.frameCount = reader.readUInt16LE();
 
     if (![3, 14].includes(tag)) {
       if (tag === 49) {
-        reader.readByte();
+        reader.readByte(reader.offset, false);
       }
 
       const transformsCount = reader.readUInt32LE();
+
       for (let i = 0; i < transformsCount; i++) {
         const childIndex = reader.readUInt16LE();
         const matrixIndex = reader.readUInt16LE();
@@ -44,7 +45,7 @@ export class MovieClip extends Entity {
 
     if ([12, 35, 49].includes(tag)) {
       for (let i = 0; i < bindsCount; i++) {
-        const blend = reader.readByte();
+        const blend = reader.readByte(reader.offset, false);
         this.blends.push(blend);
       }
     }
@@ -59,7 +60,7 @@ export class MovieClip extends Entity {
       const frameTag = reader.readByte();
       const frameLength = reader.readInt32LE();
 
-      if (!frameTag) {
+      if (frameTag === 0) {
         break;
       }
 
@@ -75,7 +76,7 @@ export class MovieClip extends Entity {
       } else if (frameTag === 41) {
         this.matrixIndex = reader.readByte();
       } else {
-        reader.readByte(frameLength);
+        reader.readBytes(frameLength);
       }
     }
   }

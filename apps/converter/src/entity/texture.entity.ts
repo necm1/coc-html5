@@ -34,13 +34,9 @@ export class Texture extends Entity {
       khronosTextureFileName = reader.readString();
     }
 
-    this.pixelType = reader.readByte();
+    this.pixelType = reader.readByte(reader.offset, false);
     this.width = reader.readUInt16LE();
     this.height = reader.readUInt16LE();
-
-    console.log(
-      `Loading texture with tag ${tag}, pixelType: ${this.pixelType}, dimensions: ${this.width}x${this.height}`
-    );
 
     if (!file.hasTexture) {
       return;

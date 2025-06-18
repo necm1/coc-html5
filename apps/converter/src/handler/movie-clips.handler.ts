@@ -10,11 +10,23 @@ export class MovieClipsHandler extends Handler {
     return [3, 10, 12, 14, 35, 49].includes(tag);
   }
 
-  public override async handle({ file, tag }: HandlerProps): Promise<void> {
+  public override async handle({
+    file,
+    tag,
+    movieClipsLoaded = 0,
+  }: HandlerProps): Promise<void> {
     const reader = file.bufferReader;
-    const movieClip = new MovieClip();
-    await movieClip.load(reader, tag);
-    file.movieClips.push(movieClip);
+
+    let movieClip;
+
+    if (file.movieClips[movieClipsLoaded]) {
+      movieClip = file.movieClips[movieClipsLoaded];
+      await movieClip.load(reader, tag);
+    } else {
+      movieClip = new MovieClip();
+      await movieClip.load(reader, tag);
+      file.movieClips[movieClipsLoaded] = movieClip;
+    }
 
     HandlerEventEmitter.getInstance().emit('afterHandle', {
       type: HandlerEventType.MOVIE_CLIP_LOADED,
