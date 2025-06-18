@@ -1,9 +1,11 @@
 import { BufferReader } from '../buffer-reader';
 import { Processor } from '../interface/processor.interface';
+import { ScFile } from '../sc-file';
 
 export class SigProcessor extends Processor {
   public canProcess(data: BufferReader): boolean {
     const buffer = data.buffer.subarray(0, 4);
+
     return (
       buffer.length >= 4 &&
       buffer[0] === 0x53 &&
@@ -13,8 +15,9 @@ export class SigProcessor extends Processor {
     );
   }
 
-  public async process(): Promise<void> {
-    // Placeholder for SIG processing logic
-    console.log('SIG processing logic not implemented yet.');
+  public async process(scFile: ScFile): Promise<void> {
+    scFile.bufferReader = new BufferReader(
+      scFile.bufferReader.buffer.subarray(68)
+    );
   }
 }
