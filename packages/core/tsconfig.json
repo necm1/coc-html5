@@ -4,6 +4,12 @@
   "include": [],
   "references": [
     {
+      "path": "../gamearea"
+    },
+    {
+      "path": "../asset-manager"
+    },
+    {
       "path": "./tsconfig.lib.json"
     }
   ]

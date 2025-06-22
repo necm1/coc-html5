@@ -1,4 +1,6 @@
-import { Application, ICanvas, RenderLayer } from 'pixi.js';
+import { Application, ICanvas, RenderLayer, Sprite } from 'pixi.js';
+import { Camera } from './camera.container';
+import { AssetManager } from '@coc/asset-manager';
 
 export class ClashCore {
   private static instance: ClashCore;
@@ -6,6 +8,7 @@ export class ClashCore {
   public app: Application;
   public canvas: ICanvas;
   public layer = new RenderLayer();
+  public camera: Camera;
 
   public static getInstance(): ClashCore {
     if (!ClashCore.instance) {
@@ -31,13 +34,26 @@ export class ClashCore {
     });
 
     this.canvas = this.app.canvas;
+
+    await this.prepareAssets();
+
     this.app.stage.addChild(this.layer);
+
+    this.camera = new Camera();
 
     document.body.appendChild(this.app.canvas);
   }
 
+  private async prepareAssets(): Promise<void> {
+    await AssetManager.add('background_gamearea');
+    await AssetManager.add('background_cc_gamearea');
+    await Promise.all([
+      AssetManager.add('background_gamearea'),
+      AssetManager.add('background_cc_gamearea'),
+    ]);
+  }
+
   public destroy(): void {
     this.app.destroy(true, { children: true });
-    // window.removeEventListener('resize');
   }
 }

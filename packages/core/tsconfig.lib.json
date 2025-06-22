@@ -10,5 +10,12 @@
     "lib": ["es2020", "dom"]
   },
   "include": ["src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../gamearea/tsconfig.lib.json"
+    },
+    {
+      "path": "../asset-manager/tsconfig.lib.json"
+    }
+  ]
 }
