@@ -45,8 +45,6 @@ export class ClashCore {
   }
 
   private async prepareAssets(): Promise<void> {
-    await AssetManager.add('background_gamearea');
-    await AssetManager.add('background_cc_gamearea');
     await Promise.all([
       AssetManager.add('background_gamearea'),
       AssetManager.add('background_cc_gamearea'),
