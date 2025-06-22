@@ -82,28 +82,11 @@ export class Camera extends Container {
   private clamCameraPosition(): void {
     const world = this.world;
 
-    const worldWidth = world.width;
-    const worldHeight = world.height;
-    const scaledWidth = worldWidth * this.scale.x;
-    const scaledHeight = worldHeight * this.scale.y;
-
-    const minX =
-      scaledWidth < this.core.app.screen.width
-        ? (this.core.app.screen.width - scaledWidth) / 2
-        : this.core.app.screen.width - scaledWidth;
-    const maxX =
-      scaledWidth < this.core.app.screen.width
-        ? (this.core.app.screen.width - scaledWidth) / 2
-        : 0;
-
+    const minX = this.core.app.screen.width - (world.width * this.scale.x) / 2;
+    const maxX = (world.width * this.scale.x) / 2;
     const minY =
-      scaledHeight < this.core.app.screen.height
-        ? (this.core.app.screen.height - scaledHeight) / 2
-        : this.core.app.screen.height - scaledHeight;
-    const maxY =
-      scaledHeight < this.core.app.screen.height
-        ? (this.core.app.screen.height - scaledHeight) / 2
-        : 0;
+      this.core.app.screen.height - (world.height * this.scale.y) / 2;
+    const maxY = (world.height * this.scale.y) / 2;
 
     this.x = this.clamp(this.x, minX, maxX);
     this.y = this.clamp(this.y, minY, maxY);

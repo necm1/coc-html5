@@ -15,16 +15,12 @@ export class GameArea extends Container {
     this.hitArea = null;
     this.cursor = 'default';
 
-    this.width = this.core.app.canvas.width;
-    this.height = this.core.app.canvas.height;
-
     this.x = 0;
     this.y = 0;
 
-    this.tilesContainer = new TilesContainer(this);
+    this.tilesContainer = new TilesContainer();
 
     this.init();
-
     this.addChild(this.tilesContainer);
   }
 
@@ -40,14 +36,24 @@ export class GameArea extends Container {
     }
 
     this.backgroundSprite = new Sprite(texture);
+
     this.backgroundSprite.anchor.set(0);
-    this.backgroundSprite.position.set(0);
+    this.backgroundSprite.position.set(0, 0);
     this.backgroundSprite.zIndex = -1;
-    this.backgroundSprite.width = this.core.app.screen.width;
-    this.backgroundSprite.height = this.core.app.screen.height;
+
+    const isoWidth =
+      (this.tilesContainer.gridWidth + this.tilesContainer.gridHeight) *
+      (this.tilesContainer.tileSize / 2);
+    const isoHeight =
+      (this.tilesContainer.gridWidth + this.tilesContainer.gridHeight) *
+      (this.tilesContainer.tileSize / 2) *
+      this.tilesContainer.skewFactor;
+
+    this.backgroundSprite.anchor.set(0.5);
+    this.backgroundSprite.position.set(0, 0);
+    this.backgroundSprite.width = isoWidth;
+    this.backgroundSprite.height = isoHeight;
 
     this.addChild(this.backgroundSprite);
-
-    this.tilesContainer.fitGridToGameArea();
   }
 }

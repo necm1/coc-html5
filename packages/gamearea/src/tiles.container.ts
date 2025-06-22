@@ -1,14 +1,13 @@
 import { Container, Graphics } from 'pixi.js';
-import { GameArea } from './gamearea.container';
 
 export class TilesContainer extends Container {
-  private tileSize = 45;
-  private gridWidth = 56;
-  private gridHeight = 56;
+  public readonly tileSize = 45.25;
+  public readonly gridWidth = 56;
+  public readonly gridHeight = 56;
   private gridGraphics: Graphics;
-  private skewFactor = 0.52;
+  public skewFactor = 0.52;
 
-  constructor(private readonly gamearea: GameArea) {
+  constructor() {
     super();
 
     this.label = 'TilesContainer';
@@ -23,39 +22,8 @@ export class TilesContainer extends Container {
 
     this.gridGraphics = new Graphics();
     this.addChild(this.gridGraphics);
-  }
 
-  /**
-   * Calculate the optimal tileSize so that the isometric bounding box of the grid fits exactly into the game area
-   */
-  public fitGridToGameArea(
-    gridWidth = this.gridWidth,
-    gridHeight = this.gridHeight
-  ) {
-    const areaW = this.gamearea.width;
-    const areaH = this.gamearea.height;
-
-    if (areaW <= 0 || areaH <= 0) {
-      return;
-    }
-
-    const maxTileSizeW = (areaW / (gridWidth + gridHeight)) * 2;
-    const maxTileSizeH =
-      ((areaH / (gridWidth + gridHeight)) * 2) / this.skewFactor;
-
-    let tileSize = Math.min(maxTileSizeW, maxTileSizeH);
-
-    if (!isFinite(tileSize) || tileSize < 1) {
-      tileSize = 1;
-    }
-
-    this.gridWidth = gridWidth;
-    this.gridHeight = gridHeight;
-    this.tileSize = tileSize;
     this.drawGrid();
-    const app = this.gamearea.core.app;
-    this.x = app.renderer.width / 2;
-    this.y = app.renderer.height / 2;
   }
 
   private drawGrid() {

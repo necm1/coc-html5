@@ -18,5 +18,10 @@ export class ClashWorld extends Container {
     this.addChild(this.gameArea as unknown as Container);
 
     this.core.camera.addChild(this);
+
+    setTimeout(() => {
+      this.core.camera.x = this.core.app.screen.width / 2;
+      this.core.camera.y = this.core.app.screen.height / 2;
+    }, 0);
   }
 }
