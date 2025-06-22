@@ -63,10 +63,4 @@ export class ShapeRenderer extends Renderer {
 
     return rect;
   }
-
-  // constructor(public readonly id: number, public readonly regions: Region[]) {}
-
-  // public async render(matrix: Matrix2x3): Promise<Buffer> {
-  //   const matrixMultiply = new Matrix2x3()
-  // }
 }

@@ -27,7 +27,7 @@ export class Matrix extends Entity {
     return this.matrices[index];
   }
 
-  public getColorTransformation(index: number): ColorTransform {
+  public getColorTransform(index: number): ColorTransform {
     if (index < 0 || index >= this.colorTransformations.length) {
       throw new Error(`Color transformation index out of bounds: ${index}`);
     }

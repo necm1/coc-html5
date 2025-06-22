@@ -15,6 +15,10 @@ export class MovieClipFrame extends Entity {
     return this.elements[index];
   }
 
+  public getElements(): [number, number, number][] {
+    return this.elements;
+  }
+
   public get elementsCount(): number {
     return this._elementsCount;
   }

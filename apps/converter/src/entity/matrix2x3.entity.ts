@@ -22,7 +22,7 @@ export class Matrix2x3 extends Entity {
     this.d = partial.d ?? 1;
     this.x = partial.x ?? 0;
     this.y = partial.y ?? 0;
-    // if ()
+
     // Object.assign(this, partial);
   }
 

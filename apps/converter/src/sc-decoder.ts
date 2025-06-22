@@ -6,12 +6,6 @@ import { BufferEmptyException } from './exception/buffer-empty.exception';
 import { NoProcessorException } from './exception/no-processor.exception';
 import { Asset } from './entity/asset.entity';
 import { HandlerEventEmitter, HandlerEventType } from './handler.event-emitter';
-import * as fs from 'fs/promises';
-import { basename, join } from 'path';
-import { ShapeRenderer } from './renderer/shape.renderer';
-import { Matrix2x3 } from './entity/matrix2x3.entity';
-import { writeFile } from 'fs/promises';
-import sharp from 'sharp';
 import { ScProcessor } from './processor/sc.processor';
 import { SigProcessor } from './processor/sig.processor';
 import { ZstdProcessor } from './processor/zstd.processor';
@@ -78,12 +72,6 @@ export class ScDecoder {
 
       await this.decode(this._scFile, true);
     }
-
-    if (isTexture) {
-      await this.saveShapes();
-    }
-
-    console.log('> SC file decoding completed.');
   }
 
   public async decodeMetadata(
@@ -180,81 +168,6 @@ export class ScDecoder {
         name,
       });
     }
-  }
-
-  private async saveShapes(): Promise<void> {
-    if (!this._scFile.shapes.length) {
-      return;
-    }
-
-    const texFilename = this._scFile.filePath.endsWith('_tex.sc')
-      ? basename(this._scFile.filePath, '_tex.sc')
-      : basename(this._scFile.filePath, '.sc');
-
-    const outputPath = join(
-      __dirname,
-      '../../../../src/assets',
-      `out/${texFilename}`
-    );
-
-    await fs.mkdir(join(outputPath, 'shapes'), { recursive: true });
-    await fs.mkdir(join(outputPath, 'shapes/regions'), { recursive: true });
-
-    const shapesRegionsSummary: any[] = [];
-
-    for (let i = 0; i < this._scFile.shapes.length; i++) {
-      const shape = this._scFile.shapes[i];
-
-      if (!shape) {
-        continue;
-      }
-
-      const renderedShape = new ShapeRenderer(shape);
-      const shapeImage = await renderedShape.render(new Matrix2x3());
-
-      const pngPath = join(outputPath, 'shapes', `${shape.id}.png`);
-      await sharp(shapeImage.toBuffer())
-        .png({
-          compressionLevel: 6,
-          colors: 256,
-        })
-        .toFile(pngPath);
-
-      const regionsCount = shape.regions.length;
-      const regionsSummary: any[] = [];
-
-      for (let j = 0; j < regionsCount; j++) {
-        const region = shape.regions[j];
-        const renderedRegion = region.getImage();
-
-        if (!renderedRegion) {
-          continue;
-        }
-
-        const regionFileName = `${shape.id}_region_${j}.png`;
-        const regionPngPath = join(
-          outputPath,
-          'shapes/regions',
-          regionFileName
-        );
-        await writeFile(regionPngPath, renderedRegion.toBuffer('image/png'));
-
-        regionsSummary.push({
-          regionIndex: j,
-          xyPoints: region.xyPoints,
-          uvPoints: region.uvPoints,
-          textureIndex: region.textureIndex,
-          imageFile: regionFileName,
-        });
-      }
-      shapesRegionsSummary.push({
-        shapeId: shape.id,
-        regions: regionsSummary,
-      });
-    }
-
-    const summaryPath = join(outputPath, 'shapes', 'shapes_regions.json');
-    await writeFile(summaryPath, JSON.stringify(shapesRegionsSummary, null, 2));
   }
 
   private async loadTags(scFile = this._scFile): Promise<boolean> {
