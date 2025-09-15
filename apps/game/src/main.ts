@@ -1,8 +1,13 @@
-import { ClashCore, ClashWorld } from '@coc/core';
+import { ClashCore } from '@coc/core';
+import { Logger } from '@coc/utils';
 
 (async () => {
-  const clash = ClashCore.getInstance();
-  await clash.init();
+  const logger = new Logger('Main');
 
-  const world = new ClashWorld();
+  try {
+    const clash = ClashCore.getInstance();
+    await clash.init();
+  } catch (error) {
+    logger.error('Error initializing ClashCore:', error);
+  }
 })();

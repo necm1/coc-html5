@@ -1,10 +1,12 @@
 import { Container } from 'pixi.js';
 import { ClashCore } from './core';
 import { GameArea } from '@coc/gamearea';
+import { Logger } from '@coc/utils';
 
 export class ClashWorld extends Container {
+  private readonly logger: Logger = new Logger(ClashWorld.name);
   private core: ClashCore = ClashCore.getInstance();
-  private gameArea: GameArea;
+  private _gameArea: GameArea = new GameArea();
 
   constructor() {
     super();
@@ -13,15 +15,18 @@ export class ClashWorld extends Container {
     this.interactiveChildren = true;
     this.hitArea = null;
     this.cursor = 'default';
+  }
 
-    this.gameArea = new GameArea(this.core);
-    this.addChild(this.gameArea as unknown as Container);
+  public async init() {
+    this._gameArea.core = this.core;
 
-    this.core.camera.addChild(this);
+    await this._gameArea.init();
+    this.addChild(this._gameArea as unknown as Container);
 
-    setTimeout(() => {
-      this.core.camera.x = this.core.app.screen.width / 2;
-      this.core.camera.y = this.core.app.screen.height / 2;
-    }, 0);
+    this.logger.info('ClashWorld initialized');
+  }
+
+  public get gameArea(): GameArea {
+    return this._gameArea;
   }
 }

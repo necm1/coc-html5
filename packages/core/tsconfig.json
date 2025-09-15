@@ -7,6 +7,9 @@
       "path": "../gamearea"
     },
     {
+      "path": "../utils"
+    },
+    {
       "path": "../asset-manager"
     },
     {

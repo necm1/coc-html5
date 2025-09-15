@@ -106,6 +106,62 @@ export class ScFile {
 
     const shapesRegionsSummary: any[] = [];
 
+    // const townhall11 = this.shapes.find((shape) => shape.id === 8010);
+
+    // if (townhall11) {
+    //   const renderedTownhall11 = new ShapeRenderer(townhall11);
+    //   const townhall11Image = await renderedTownhall11.render(new Matrix2x3());
+
+    //   const townhall11PngPath = join(
+    //     outputPath,
+    //     'shapes',
+    //     `${townhall11.id}.png`
+    //   );
+    //   await sharp(townhall11Image.toBuffer())
+    //     .png({
+    //       compressionLevel: 6,
+    //       colors: 256,
+    //     })
+    //     .toFile(townhall11PngPath);
+
+    //   const regionsCount = townhall11.regions.length;
+    //   const regionsSummary: any[] = [];
+
+    //   for (let j = 0; j < regionsCount; j++) {
+    //     const region = townhall11.regions[j];
+    //     const renderedRegion = region.getImage();
+
+    //     if (!renderedRegion) {
+    //       continue;
+    //     }
+
+    //     const regionFileName = `${townhall11.id}_region_${j}.png`;
+    //     const regionPngPath = join(
+    //       outputPath,
+    //       'shapes/regions',
+    //       regionFileName
+    //     );
+    //     await writeFile(regionPngPath, renderedRegion.toBuffer('image/png'));
+
+    //     regionsSummary.push({
+    //       regionIndex: j,
+    //       xyPoints: region.xyPoints,
+    //       uvPoints: region.uvPoints,
+    //       textureIndex: region.textureIndex,
+    //       mirrored: region.isMirrored,
+    //       rotation: region.rotation,
+    //       imageFile: regionFileName,
+    //       pointCount: region.pointCount,
+    //       height: region.texture?.height || 0,
+    //       width: region.texture?.width || 0,
+    //     });
+    //   }
+    //   shapesRegionsSummary.push({
+    //     shapeId: townhall11.id,
+    //     regions: regionsSummary,
+    //   });
+    // }
+
     for (let i = 0; i < this.shapes.length; i++) {
       const shape = this.shapes[i];
 
@@ -152,6 +208,8 @@ export class ScFile {
           rotation: region.rotation,
           imageFile: regionFileName,
           pointCount: region.pointCount,
+          height: region.texture?.height || 0,
+          width: region.texture?.width || 0,
         });
       }
       shapesRegionsSummary.push({

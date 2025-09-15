@@ -1,4 +1,5 @@
 import { Matrix2x3 } from './matrix2x3';
+import { Point } from './point';
 import { Rect } from './rect';
 import { Region } from './region';
 
@@ -11,7 +12,7 @@ export class ShapeRenderer {
     private readonly assetName: string
   ) {}
 
-  public async render(matrix: Matrix2x3): Promise<any> {
+  public async render(matrix: Matrix2x3): Promise<HTMLCanvasElement> {
     const matrixMultiplied = this.matrix;
     matrixMultiplied.multiply(matrix);
 
@@ -45,7 +46,7 @@ export class ShapeRenderer {
       const x = Math.round(regionBounds.left - bounds.left);
       const y = Math.round(regionBounds.top - bounds.top);
 
-      ctx.drawImage(renderedRegion, x, y);
+      ctx.drawImage(renderedRegion as any, x, y);
     }
 
     return canvas;
@@ -68,6 +69,7 @@ export class ShapeRenderer {
 
     return rect;
   }
+
   public set regions(value: any[]) {
     if (!Array.isArray(value)) {
       throw new Error('Regions must be an array');
@@ -76,11 +78,27 @@ export class ShapeRenderer {
     const regions = value.map((regionEntry) => {
       const region = new Region();
 
-      region.xyPoints = regionEntry.xyPoints;
-      region.uvPoints = regionEntry.uvPoints;
+      region.xyPoints = regionEntry.xyPoints.map(
+        (point: Point) => new Point(point.x, point.y)
+      );
+
+      region.uvPoints = regionEntry.uvPoints.map(
+        (point: Point) => new Point(point.x, point.y)
+      );
+      // region.uvPoints = regionEntry.uvPoints.map(
+      //   (point) =>
+      //     new Point(point.x / regionEntry.width, point.y / regionEntry.height)
+      // );
       region.textureIndex = regionEntry.textureIndex;
-      region.texture =
-        this.textures[`${this.assetName}/${regionEntry.imageFile}`] || null;
+
+      const texKey = `${this.assetName}/${regionEntry.imageFile}`;
+
+      if (!this.textures[texKey]) {
+        console.warn(`Texture not found for key: ${texKey}`);
+      }
+
+      region.texture = this.textures[texKey];
+
       region.rotation = regionEntry.rotation || 0;
       region.isMirrored = regionEntry.mirrored || false;
       return region;

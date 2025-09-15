@@ -15,6 +15,9 @@
       "path": "../gamearea/tsconfig.lib.json"
     },
     {
+      "path": "../utils/tsconfig.lib.json"
+    },
+    {
       "path": "../asset-manager/tsconfig.lib.json"
     }
   ]

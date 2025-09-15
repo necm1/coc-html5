@@ -11,7 +11,7 @@ import { getByteCountByPixelType, getFormatByPixelType } from '../utils/pixel';
 const CHUNK_SIZE = 32;
 
 export class Texture extends Entity {
-  public image: any;
+  public image: Canvas | null = null;
   public imageBuffer: Buffer | null = null;
 
   public pixelType = -1;
@@ -55,11 +55,14 @@ export class Texture extends Entity {
       return;
     }
 
-    this.image = this.loadTexture(reader, tag);
+    this.image = await this.loadTexture(reader, tag);
     return;
   }
 
-  private async loadTexture(reader: BufferReader, tag: number): Promise<any> {
+  private async loadTexture(
+    reader: BufferReader,
+    tag: number
+  ): Promise<Canvas | null> {
     if ([27, 28, 29].includes(tag)) {
       return this.joinImage(reader);
     }

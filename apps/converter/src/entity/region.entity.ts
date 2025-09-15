@@ -1,6 +1,5 @@
 import { Canvas, createCanvas } from 'canvas';
 import { Entity } from '../interface/entity.interface';
-import { Vector2D } from '../interface/vector2d.interface';
 import { ScFile } from '../sc-file';
 import { Point } from '../utils/point';
 import { applyMatrix, comparePolygons, getRect } from '../utils/polygon';
@@ -39,6 +38,7 @@ export class Region extends Entity {
 
     for (let i = 0; i < this.pointCount; i++) {
       let u, v;
+
       if (tag === 4) {
         u = (reader.readUInt16LE() * 0xffff) / this.texture.width;
         v = (reader.readUInt16LE() * 0xffff) / this.texture.height;
@@ -162,12 +162,6 @@ export class Region extends Entity {
     const width = Math.max(Math.round(rect.width), 1);
     const height = Math.max(Math.round(rect.height), 1);
 
-    // console.log(
-    //   `Region: ${this.textureIndex}, Points: ${
-    //     this.pointCount
-    //   }, Rect: ${rect.asTuple()}`
-    // );
-
     if (width + height <= 2) {
       const srcCanvas = this.texture.image;
       const srcCtx = srcCanvas.getContext('2d');
@@ -200,6 +194,7 @@ export class Region extends Entity {
     maskCtx.fill();
 
     const srcCanvas = this.texture.image;
+    // console.log(srcCanvas.toDataURL());
     const cropCanvas = createCanvas(width, height);
     const cropCtx = cropCanvas.getContext('2d');
     cropCtx.drawImage(
@@ -207,27 +202,28 @@ export class Region extends Entity {
       rect.left,
       rect.top,
       width,
-      height, // Quelle
+      height,
       0,
       0,
       width,
-      height // Ziel
+      height
     );
 
-    // 3. Maske auf Crop anwenden
+    // console.log('Crop', cropCanvas.toDataURL());
+
     const maskCrop = createCanvas(width, height);
     const maskCropCtx = maskCrop.getContext('2d');
     maskCropCtx.drawImage(maskCanvas, -rect.left, -rect.top);
     cropCtx.globalCompositeOperation = 'destination-in';
     cropCtx.drawImage(maskCrop, 0, 0);
 
-    // 4. Rückgabe
+    // console.log('Crop with mask', cropCanvas.toDataURL());
+
     this.cacheImage = cropCanvas;
     return cropCanvas;
   }
 
   public calculateBounds(matrix?: Matrix2x3 | null): Rect {
-    // this._xyPoints: Point[]
     const rect = getRect(applyMatrix(this.xyPoints, matrix));
     return new Rect({
       left: Math.round(rect.left),

@@ -1,11 +1,26 @@
 import { Container, Graphics } from 'pixi.js';
+import { Townhall } from './items/townhall.game-object';
+import { ArcherTower } from './items/archer-tower.game-object';
+import { GameObject } from './interface/game-object.abstract';
+import {
+  fromScreen,
+  GRID_HEIGHT,
+  GRID_WIDTH,
+  Logger,
+  TILE_SIZE,
+  toIso,
+} from '@coc/utils';
 
 export class TilesContainer extends Container {
-  public readonly tileSize = 45.25;
+  private readonly logger: Logger = new Logger(TilesContainer.name);
+
+  public readonly tileSize = 54;
   public readonly gridWidth = 56;
   public readonly gridHeight = 56;
+
   private gridGraphics: Graphics;
-  public skewFactor = 0.52;
+  public skewFactor = 0.5;
+  public currentDraggedObject: any = null;
 
   constructor() {
     super();
@@ -17,47 +32,125 @@ export class TilesContainer extends Container {
     this.cursor = 'default';
     this.x = 0;
     this.y = 0;
+    this.eventMode = 'static';
+    this.interactive = true;
 
-    this.zIndex = 1;
+    this.zIndex = 3;
 
     this.gridGraphics = new Graphics();
+    this.gridGraphics.sortableChildren = true;
     this.addChild(this.gridGraphics);
 
-    this.drawGrid();
+    this.on('pointerdown', (event) => {
+      if (this.currentDraggedObject) {
+        this.currentDraggedObject.onDragEnd();
+        this.currentDraggedObject = null;
+        return;
+      }
+
+      const pos = event.getLocalPosition(this);
+
+      const { x, y } = fromScreen(pos.x, pos.y, TILE_SIZE);
+      const obj = this.getObjectAtTile(Math.floor(x), Math.floor(y));
+
+      if (obj) {
+        this.currentDraggedObject = obj;
+        obj.onDragStart(event);
+      }
+    });
+
+    this.on('pointermove', (event) => {
+      if (this.currentDraggedObject) {
+        this.currentDraggedObject.onDragMove(event);
+      }
+    });
+
+    // this.on('pointerup', (event) => {
+    //   if (this.currentDraggedObject) {
+    //     // this.currentDraggedObject.onDragEnd(event);
+    //     this.currentDraggedObject = null;
+    //   }
+    // });
+
+    // this.drawGrid();
+
+    this.logger.info('TilesContainer initialized');
+  }
+
+  public getObjectAtTile(x: number, y: number): any {
+    for (const child of this.children) {
+      const obj = child as GameObject;
+      if (
+        typeof obj.tileX === 'number' &&
+        typeof obj.tileY === 'number' &&
+        typeof obj.tilesWidth === 'number' &&
+        typeof obj.tileHeight === 'number'
+      ) {
+        const left = obj.tileX;
+        const top = obj.tileY;
+        const right = left + obj.tilesWidth - 1;
+        const bottom = top + obj.tileHeight - 1;
+        if (x >= left && x <= right && y >= top && y <= bottom) {
+          return obj;
+        }
+      }
+    }
+    return null;
+  }
+
+  public async placeTownhall() {
+    const townhall = new Townhall();
+
+    await townhall.init(0, 0, 4, 4);
+
+    this.addChild(townhall);
+  }
+
+  public async placeArcher() {
+    const archerTower = new ArcherTower();
+    await archerTower.init(0, 4, 3, 3);
+
+    this.addChild(archerTower);
   }
 
   private drawGrid() {
     this.gridGraphics.clear();
     this.gridGraphics.lineStyle(1, 0x888888, 1);
-
-    const p1 = this.toIso(0, 0);
-    const p2 = this.toIso(this.gridWidth, 0);
-    const p3 = this.toIso(0, this.gridHeight);
-    const p4 = this.toIso(this.gridWidth, this.gridHeight);
-    const offsetX = (p1.x + p2.x + p3.x + p4.x) / 4;
-    const offsetY = (p1.y + p2.y + p3.y + p4.y) / 4;
-
-    for (let x = 0; x <= this.gridWidth; x++) {
-      const start = this.toIso(x, 0);
-      const end = this.toIso(x, this.gridHeight);
-      this.gridGraphics.moveTo(start.x - offsetX, start.y - offsetY);
-      this.gridGraphics.lineTo(end.x - offsetX, end.y - offsetY);
+    for (let x = 0; x <= GRID_WIDTH; x++) {
+      const start = toIso({ x, y: 0 });
+      const end = toIso({ x, y: GRID_HEIGHT });
+      this.gridGraphics.moveTo(start.x, start.y);
+      this.gridGraphics.lineTo(end.x, end.y);
     }
-
-    for (let y = 0; y <= this.gridHeight; y++) {
-      const start = this.toIso(0, y);
-      const end = this.toIso(this.gridWidth, y);
-      this.gridGraphics.moveTo(start.x - offsetX, start.y - offsetY);
-      this.gridGraphics.lineTo(end.x - offsetX, end.y - offsetY);
+    for (let y = 0; y <= GRID_HEIGHT; y++) {
+      const start = toIso({ x: 0, y });
+      const end = toIso({ x: GRID_WIDTH, y });
+      this.gridGraphics.moveTo(start.x, start.y);
+      this.gridGraphics.lineTo(end.x, end.y);
     }
-
     this.gridGraphics.endFill();
   }
 
-  public toIso(x: number, y: number) {
-    return {
-      x: (x + y) * (this.tileSize / 2),
-      y: (y - x) * (this.tileSize / 2) * this.skewFactor,
-    };
+  public isPlaceable(obj: GameObject, tileX: number, tileY: number): boolean {
+    if (
+      tileX < 0 ||
+      tileY < 0 ||
+      tileX + obj.tilesWidth > GRID_WIDTH ||
+      tileY + obj.tileHeight > GRID_HEIGHT
+    ) {
+      return false;
+    }
+
+    for (const child of this.children) {
+      if (child === obj || !(child instanceof GameObject)) continue;
+      const overlap =
+        tileX < child.tileX + child.tilesWidth &&
+        tileX + obj.tilesWidth > child.tileX &&
+        tileY < child.tileY + child.tileHeight &&
+        tileY + obj.tileHeight > child.tileY;
+      if (overlap) return false;
+    }
+
+    return true;
   }
 }
