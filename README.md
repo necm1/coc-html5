@@ -8,5 +8,11 @@ I should mention that the isometric implementation and rendering of the world is
 
 ## Preview
 
+
+
+https://github.com/user-attachments/assets/f3971dc7-df0b-4d82-8300-9e48092aa263
+
+
+
 <img width="2550" height="1321" alt="image" src="https://github.com/user-attachments/assets/8807aec6-027b-4fec-92f3-4a1f69d6453e" />
 
