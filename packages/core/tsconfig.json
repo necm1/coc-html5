@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "../gamearea"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../asset-manager"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ]
+}

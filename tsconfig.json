@@ -32,6 +32,21 @@
   "references": [
     {
       "path": "./apps/converter"
+    },
+    {
+      "path": "./apps/game"
+    },
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/asset-manager"
+    },
+    {
+      "path": "./packages/gamearea"
+    },
+    {
+      "path": "./packages/utils"
     }
   ]
 }
